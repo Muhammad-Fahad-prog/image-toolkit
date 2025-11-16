@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Toolkit</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for a cleaner look */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Style for the active tab */
+        .tab-button.active {
+            @apply bg-blue-600 text-white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-6">
+    <!-- NEW: FAQ Modal (Hidden by default) -->
+    <div id="faqModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h2 class="text-2xl font-bold text-gray-800">Help & FAQ</h2>
+                <button id="closeModalButton" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="space-y-6">
+                <!-- How to Use Section -->
+                <section>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">How to Use This Tool</h3>
+                    <ol class="list-decimal list-inside space-y-2 text-gray-600">
+                        <li>
+                            <strong>Upload Image:</strong> Click "Select Image" to upload your file. You'll see a preview and details like dimensions and file size.
+                        </li>
+                        <li>
+                            <strong>Choose a Tool:</strong>
+                            <ul class="list-disc list-inside ml-4 mt-1 space-y-1">
+                                <li><strong>Converter:</strong> Select your desired output format (e.g., JPEG, PNG). If you choose JPEG or WebP, you can adjust the "Quality" slider to reduce file size.</li>
+                                <li><strong>Resizer:</strong> Use this for print. Enter a physical "Width" and "Height" (in inches) and a "DPI" (e.g., 300 for high-quality print).</li>
+                                <li><strong>High Resoluter:</strong> Use this to make your image dimensions larger. Enter a "Scale Factor" (like 2 for 2x) OR a "Target Width" (in pixels).</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Download:</strong> Click the "Convert", "Resize", or "Upscale" button to process and download your new image.
+                        </li>
+                    </ol>
+                </section>
+
+                <!-- FAQ Section -->
+                <section>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Frequently Asked Questions (FAQ)</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-gray-800">Q: Why did my file size increase when I converted my JPG to PNG?</h4>
+                            <p class="text-gray-600">A: PNG is a "lossless" format, meaning it stores perfect pixel data without compression, which results in a larger file size than a "lossy" JPEG. This is normal.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800">Q: Why can't I compress my PNG file?</h4>
+                            <p class="text-gray-600">A: The "Converter" tool reduces file size by lowering the "Quality" setting of lossy formats (JPEG/WebP). PNGs are lossless and don't have this setting. To make a PNG smaller, you must convert it to a JPEG or WebP.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800">Q: What is 'DPI'?</h4>
+                            <p class="text-gray-600">A: DPI stands for "Dots Per Inch." It's a print term. For screens, a DPI of 72 or 96 is common. For high-quality printing, 300 DPI is the standard.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800">Q: Why did my file size get bigger when I used the 'High Resoluter'?</h4>
+                            <p class="text-gray-600">A: The High Resoluter adds millions of new pixels to your image to make its dimensions larger. More pixels = a larger file size. This is the correct and expected behavior.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-xl p-8 max-w-3xl w-full mx-auto relative">
+        
+        <!-- NEW: Help Icon -->
+        <button id="helpIcon" class="absolute top-6 right-6 text-gray-400 hover:text-blue-600 transition-colors" title="Help & FAQ">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.79 4 4 0 1.102-.448 2.102-1.172 2.828a4 4 0 01-5.656 0A4 4 0 018 13c0-1.102.448-2.102 1.172-2.828L8.228 9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v.01M12 17v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </button>
+
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Image Toolkit</h1>
+
+        <!-- Navigation Tabs -->
+        <nav class="flex justify-center mb-6 bg-gray-100 rounded-lg p-1.5">
+            <button data-tool="converter" class="tab-button flex-1 py-2 px-4 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-200 transition-all active">Converter</button>
+            <button data-tool="resizer" class="tab-button flex-1 py-2 px-4 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-200 transition-all">Resizer</button>
+            <button data-tool="resoluter" class="tab-button flex-1 py-2 px-4 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-200 transition-all">High Resoluter</button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+
+            <!-- File Upload -->
+            <div class="mb-4">
+                <label for="imageUpload" class="block text-sm font-medium text-gray-700 mb-1">Select Image</label>
+                <input type="file" id="imageUpload" accept="image/*" class="w-full file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition cursor-pointer">
+            </div>
+
+            <!-- Preview and Details (Shared) -->
+            <div id="imagePreviewContainer" class="hidden mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Image Preview -->
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-4">
+                        <p class="text-sm font-medium text-gray-700 mb-2">Image Preview:</p>
+                        <img id="originalImage" 
+                             src="https://placehold.co/600x400/eeeeee/aaaaaa?text=Select+an+image" 
+                             alt="Image preview" 
+                             class="w-full h-auto object-contain rounded-lg max-h-64 shadow-inner bg-gray-50">
+                    </div>
+                    <!-- Image Details -->
+                    <div class="bg-gray-50 rounded-xl p-4 flex flex-col justify-center">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Image Details</h3>
+                        <div class="space-y-2">
+                            <p class="text-sm text-gray-600">
+                                <strong class="text-gray-700">Dimensions:</strong> 
+                                <span id="imageDimensions">N/A</span>
+                            </p>
+                            <p class="text-sm text-gray-600">
+                                <strong class="text-gray-700">File Size:</strong> 
+                                <span id="imageFileSize">N/A</span>
+                            </p>
+                            <p class="text-sm text-gray-600">
+                                <strong class="text-gray-700">File Type:</strong> 
+                                <span id="imageFileType">N/A</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Global Format/Quality Controls -->
+            <div id="outputSettings" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                <div>
+                    <label for="outputFormat" class="block text-sm font-medium text-gray-700 mb-1">Output Format</label>
+                    <select id="outputFormat" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white">
+                        <option value="image/jpeg">JPEG</option>
+                        <option value="image/png">PNG</option>
+                        <option value="image/webp">WebP</option>
+                    </select>
+                </div>
+                <div id="qualityContainer">
+                    <label for="outputQuality" class="block text-sm font-medium text-gray-700 mb-1">Quality (for JPEG/WebP)</label>
+                    <input type="range" id="outputQuality" min="1" max="100" value="80" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    <span class="text-sm text-gray-500" id="qualityValue">80</span>
+                </div>
+            </div>
+
+            <!-- Tool Panels -->
+            <!-- Converter Panel -->
+            <div id="tool-converter" class="tool-panel space-y-4">
+                <p class="text-sm text-gray-600">Use this tool to convert your image to a different format (e.g., PNG to JPEG) and adjust compression quality.</p>
+                <div id="converterNote" class="hidden p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700">
+                    <strong>Note:</strong> PNG is a "lossless" format. To reduce file size (compress), please select JPEG or WebP as the output format.
+                </div>
+                <button id="convertButton" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 ease-in-out shadow-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>
+                    Select an image first
+                </button>
+            </div>
+
+            <!-- Resizer Panel -->
+            <div id="tool-resizer" class="tool-panel hidden space-y-4">
+                <p class="text-sm text-gray-600">Resize your image for print by specifying physical dimensions (inches) and DPI (Dots Per Inch).</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="resize-width-in" class="block text-sm font-medium text-gray-700 mb-1">Width (in)</label>
+                        <input type="number" id="resize-width-in" value="8.5" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    </div>
+                    <div>
+                        <label for="resize-height-in" class="block text-sm font-medium text-gray-700 mb-1">Height (in)</label>
+                        <input type="number" id="resize-height-in" value="11" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    </div>
+                    <div>
+                        <label for="resize-dpi" class="block text-sm font-medium text-gray-700 mb-1">DPI</label>
+                        <input type="number" id="resize-dpi" value="300" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    </div>
+                </div>
+                <button id="resizeButton" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 ease-in-out shadow-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>
+                    Select an image first
+                </button>
+            </div>
+
+            <!-- High Resoluter Panel -->
+            <div id="tool-resoluter" class="tool-panel hidden space-y-4">
+                <p class="text-sm text-gray-600">Upscale your image by a scale factor or to a specific pixel width. The aspect ratio will be maintained.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="upscale-factor" class="block text-sm font-medium text-gray-700 mb-1">Scale Factor</label>
+                        <input type="number" id="upscale-factor" value="2" step="0.1" min="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    </div>
+                    <div>
+                        <label for="upscale-width" class="block text-sm font-medium text-gray-700 mb-1">Target Width (px)</label>
+                        <input type="number" id="upscale-width" placeholder="e.g., 1920" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 text-center">Note: Changing one value will automatically update the other.</p>
+                <button id="upscaleButton" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 ease-in-out shadow-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>
+                    Select an image first
+                </button>
+            </div>
+        </div>
+
+        <!-- Download Link (hidden) -->
+        <a id="downloadLink" href="#" download="processed-image.png" class="hidden"></a>
+        
+        <!-- Canvas (hidden) -->
+        <canvas id="canvas" class="hidden"></canvas>
+
+        <!-- Message Area -->
+        <div id="messageArea" class="mt-4 text-center text-green-600 font-medium hidden"></div>
+
+        <!-- UPDATED: Footer -->
+        <footer class="mt-8 border-t border-gray-200 pt-6 text-center text-gray-500">
+            <p class="text-sm">Prepared by: <span class="font-medium text-gray-700">Muhammad Fahad</span> & <span class="font-medium text-gray-700">Muhammad Afaq</span></p>
+            <!--p class="text-sm">Software Engineers</p-->
+            <a href="mailto:mfahadfaryad@gmail.com" class="text-sm text-blue-600 hover:underline">mfahadfaryad@gmail.com</a>
+            <p class="text-xs mt-4">© 2025 Image Toolkit. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- SHARED ELEMENTS ---
+        const imageUpload = document.getElementById('imageUpload');
+        const originalImage = document.getElementById('originalImage');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const imageDimensions = document.getElementById('imageDimensions');
+        const imageFileSize = document.getElementById('imageFileSize');
+        const imageFileType = document.getElementById('imageFileType');
+        const downloadLink = document.getElementById('downloadLink');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d', { alpha: false }); // alpha: false for JPEG
+        const messageArea = document.getElementById('messageArea');
+        const outputSettings = document.getElementById('outputSettings');
+        const outputFormat = document.getElementById('outputFormat');
+        const outputQuality = document.getElementById('outputQuality');
+        const qualityContainer = document.getElementById('qualityContainer');
+        const qualityValue = document.getElementById('qualityValue');
+        const converterNote = document.getElementById('converterNote');
+
+        // --- NEW: MODAL ELEMENTS ---
+        const helpIcon = document.getElementById('helpIcon');
+        const faqModal = document.getElementById('faqModal');
+        const closeModalButton = document.getElementById('closeModalButton');
+
+        // --- NAVIGATION ---
+        const navButtons = {
+            converter: document.querySelector('button[data-tool="converter"]'),
+            resizer: document.querySelector('button[data-tool="resizer"]'),
+            resoluter: document.querySelector('button[data-tool="resoluter"]'),
+        };
+        const toolPanels = {
+            converter: document.getElementById('tool-converter'),
+            resizer: document.getElementById('tool-resizer'),
+            resoluter: document.getElementById('tool-resoluter'),
+        };
+
+        // --- CONVERTER ELEMENTS ---
+        const convertButton = document.getElementById('convertButton');
+        
+        // --- RESIZER ELEMENTS ---
+        const resizeButton = document.getElementById('resizeButton');
+        const resizeWidthInput = document.getElementById('resize-width-in');
+        const resizeHeightInput = document.getElementById('resize-height-in');
+        const resizeDpiInput = document.getElementById('resize-dpi');
+
+        // --- RESOLUTER ELEMENTS ---
+        const upscaleButton = document.getElementById('upscaleButton');
+        const upscaleFactorInput = document.getElementById('upscale-factor');
+        const upscaleWidthInput = document.getElementById('upscale-width');
+        
+        // --- ALL ACTION BUTTONS ---
+        const allActionButtons = [convertButton, resizeButton, upscaleButton];
+
+        // --- SHARED STATE ---
+        let imageLoaded = false;
+        let originalWidth = 0;
+        let originalHeight = 0;
+        let originalFileName = 'image';
+        let originalFileType = 'image/png';
+
+        // --- NEW: MODAL/HELP LOGIC ---
+        helpIcon.addEventListener('click', () => {
+            faqModal.classList.remove('hidden');
+        });
+        closeModalButton.addEventListener('click', () => {
+            faqModal.classList.add('hidden');
+        });
+        // Close modal if clicking on the backdrop
+        faqModal.addEventListener('click', (event) => {
+            if (event.target === faqModal) {
+                faqModal.classList.add('hidden');
+            }
+        });
+
+        // --- NEW: TAB NAVIGATION LOGIC ---
+        function showTool(toolName) {
+            Object.values(navButtons).forEach(button => {
+                button.classList.remove('active');
+            });
+            Object.values(toolPanels).forEach(panel => {
+                panel.classList.add('hidden');
+            });
+            
+            navButtons[toolName].classList.add('active');
+            toolPanels[toolName].classList.remove('hidden');
+        }
+
+        Object.keys(navButtons).forEach(toolName => {
+            navButtons[toolName].addEventListener('click', () => {
+                showTool(toolName);
+            });
+        });
+
+        // --- SHARED IMAGE LOAD LOGIC ---
+        imageUpload.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                // Revoke previous object URL to avoid memory leaks
+                if (originalImage.src.startsWith('blob:')) {
+                    URL.revokeObjectURL(originalImage.src);
+                }
+                originalImage.src = URL.createObjectURL(file);
+                
+                // Save details
+                originalFileName = file.name.split('.').slice(0, -1).join('.');
+                originalFileType = file.type;
+                
+                // Auto-select output format based on original file type
+                if (originalFileType === 'image/png') {
+                    outputFormat.value = 'image/png';
+                } else if (originalFileType === 'image/webp') {
+                    outputFormat.value = 'image/webp';
+                } else {
+                    // Default to JPEG for jpg, bmp, etc.
+                    outputFormat.value = 'image/jpeg';
+                }
+                // Trigger change event to update UI
+                outputFormat.dispatchEvent(new Event('change'));
+
+                // Show file size
+                imageFileSize.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+                imageFileType.textContent = file.type;
+            }
+        });
+
+        originalImage.onload = () => {
+            imageLoaded = true;
+            originalWidth = originalImage.naturalWidth;
+            originalHeight = originalImage.naturalHeight;
+
+            console.log("Original image loaded:", originalWidth, "x", originalHeight);
+
+            // Show preview and details
+            imagePreviewContainer.classList.remove('hidden');
+            imageDimensions.textContent = `${originalWidth}px × ${originalHeight}px`;
+
+            // Show output settings
+            outputSettings.classList.remove('hidden');
+
+            // Enable all action buttons
+            allActionButtons.forEach(button => {
+                button.disabled = false;
+            });
+            convertButton.textContent = "Convert and Download";
+            resizeButton.textContent = "Resize and Download";
+            upscaleButton.textContent = "Upscale and Download";
+
+            // Update resoluter fields
+            updateResoluterFields('factor');
+        };
+        
+        originalImage.onerror = () => {
+            imageLoaded = false;
+            console.error("Failed to load the selected image.");
+            
+            // Hide preview and details
+            imagePreviewContainer.classList.add('hidden');
+            outputSettings.classList.add('hidden');
+
+            // Disable all action buttons
+            allActionButtons.forEach(button => {
+                button.disabled = true;
+            });
+            convertButton.textContent = "Select an image first";
+            resizeButton.textContent = "Select an image first";
+            upscaleButton.textContent = "Select an image first";
+
+            showMessage("Failed to load image. Please select a valid image file (PNG, JPG, etc.).", true);
+        };
+
+        // --- GLOBAL OUTPUT SETTINGS LOGIC ---
+        outputFormat.addEventListener('change', () => {
+            if (outputFormat.value === 'image/png') {
+                qualityContainer.classList.add('hidden');
+                converterNote.classList.remove('hidden'); // Show note for converter
+            } else {
+                qualityContainer.classList.remove('hidden');
+                converterNote.classList.add('hidden'); // Hide note for converter
+            }
+        });
+
+        outputQuality.addEventListener('input', () => {
+            qualityValue.textContent = outputQuality.value;
+        });
+
+        // --- CONVERTER LOGIC ---
+        convertButton.addEventListener('click', () => {
+            if (!imageLoaded) {
+                showMessage("Please select an image first.", true);
+                return;
+            }
+            // The "compression" is just drawing to canvas and getting a new data URL
+            // with the specified format and quality.
+            const newFormat = outputFormat.value;
+            const newExtension = newFormat.split('/')[1];
+            
+            drawToCanvas(originalWidth, originalHeight, 'compress');
+            downloadCanvas(`converted-${originalFileName}`, newFormat);
+        });
+
+        // --- RESIZER LOGIC ---
+        resizeButton.addEventListener('click', () => {
+            if (!imageLoaded) {
+                showMessage("Please select an image first.", true);
+                return;
+            }
+            try {
+                const widthIn = parseFloat(resizeWidthInput.value);
+                const heightIn = parseFloat(resizeHeightInput.value);
+                const dpi = parseInt(resizeDpiInput.value, 10);
+
+                if (isNaN(widthIn) || isNaN(heightIn) || isNaN(dpi) || widthIn <= 0 || heightIn <= 0 || dpi <= 0) {
+                    showMessage("Please enter valid positive numbers for all fields.", true);
+                    return;
+                }
+
+                const pixelWidth = Math.round(widthIn * dpi);
+                const pixelHeight = Math.round(heightIn * dpi);
+                
+                const newFormat = outputFormat.value;
+                const newExtension = newFormat.split('/')[1];
+
+                drawToCanvas(pixelWidth, pixelHeight, 'resize');
+                downloadCanvas(`resized-${widthIn}x${heightIn}_${dpi}dpi`, newFormat);
+
+            } catch (error) {
+                console.error("Error during resize:", error);
+                showMessage("An error occurred during the resize process.", true);
+            }
+        });
+
+        // --- HIGH RESOLUTER LOGIC ---
+        upscaleFactorInput.addEventListener('input', () => {
+            updateResoluterFields('factor');
+        });
+        upscaleWidthInput.addEventListener('input', () => {
+            updateResoluterFields('width');
+        });
+
+        function updateResoluterFields(source) {
+            if (!imageLoaded) return;
+            const aspectRatio = originalHeight / originalWidth;
+
+            if (source === 'factor') {
+                const factor = parseFloat(upscaleFactorInput.value);
+                if (!isNaN(factor) && factor > 0) {
+                    const newWidth = Math.round(originalWidth * factor);
+                    upscaleWidthInput.value = newWidth;
+                }
+            } else if (source === 'width') {
+                const newWidth = parseInt(upscaleWidthInput.value, 10);
+                if (!isNaN(newWidth) && newWidth > 0) {
+                    const newFactor = (newWidth / originalWidth).toFixed(2);
+                    upscaleFactorInput.value = newFactor;
+                }
+            }
+        }
+
+        upscaleButton.addEventListener('click', () => {
+            if (!imageLoaded) {
+                showMessage("Please select an image first.", true);
+                return;
+            }
+            try {
+                const pixelWidth = parseInt(upscaleWidthInput.value, 10);
+                if (isNaN(pixelWidth) || pixelWidth <= 0) {
+                    showMessage("Please enter a valid target width or scale factor.", true);
+                    return;
+                }
+                const pixelHeight = Math.round(pixelWidth * (originalHeight / originalWidth));
+
+                const newFormat = outputFormat.value;
+                const newExtension = newFormat.split('/')[1];
+                
+                drawToCanvas(pixelWidth, pixelHeight, 'upscale');
+                downloadCanvas(`upscaled-${pixelWidth}w`, newFormat);
+
+            } catch (error) {
+                console.error("Error during upscale:", error);
+                showMessage("An error occurred during the upscaling process.", true);
+            }
+        });
+
+        // --- SHARED HELPER FUNCTIONS ---
+        
+        /**
+         * Draws the original image onto the canvas with new dimensions.
+         * Uses high-quality smoothing.
+         */
+        function drawToCanvas(newWidth, newHeight, operation) {
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+            
+            // Set context properties for high-quality scaling
+            ctx.imageSmoothingQuality = 'high';
+            ctx.imageSmoothingEnabled = true;
+
+            // For JPEG, we need to draw a white background first if the original is transparent
+            // otherwise transparency becomes black.
+            if (outputFormat.value === 'image/jpeg') {
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, newWidth, newHeight);
+            } else {
+                ctx.clearRect(0, 0, newWidth, newHeight);
+            }
+
+            console.log(`Drawing to canvas at ${newWidth}x${newHeight} for ${operation}`);
+            ctx.drawImage(originalImage, 0, 0, newWidth, newHeight);
+        }
+
+        /**
+         * Triggers a download of the canvas content.
+         */
+        function downloadCanvas(filename, format) {
+            const quality = parseInt(outputQuality.value, 10) / 100;
+            const dataUrl = canvas.toDataURL(format, quality);
+            const extension = format.split('/')[1];
+            
+            downloadLink.href = dataUrl;
+            downloadLink.download = `${filename}.${extension}`;
+            downloadLink.click();
+
+            showMessage(`Success! Downloading ${filename}.${extension}`, false);
+        }
+
+        /**
+         * Shows a temporary message to the user.
+         */
+        function showMessage(message, isError = false) {
+            messageArea.textContent = message;
+            messageArea.classList.remove('hidden');
+            if (isError) {
+                messageArea.classList.add('text-red-600');
+                messageArea.classList.remove('text-green-600');
+            } else {
+                messageArea.classList.add('text-green-600');
+                messageArea.classList.remove('text-red-600');
+            }
+            // Hide message after 5 seconds
+            setTimeout(() => {
+                messageArea.classList.add('hidden');
+            }, 5000);
+        }
+
+        // --- INITIALIZATION ---
+        showTool('converter'); // Show the first tool by default
+    </script>
+</body>
+</html>
